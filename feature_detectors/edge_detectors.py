@@ -1,8 +1,8 @@
 import cv2
 import numpy as np
 
-def detect_canny_edges(img):
-  return cv2.Canny(img, 100, 200, apertureSize = 3)
+def detect_canny_edges(img, min_thresh, max_thresh):
+  return cv2.Canny(img, min_thresh, max_thresh, apertureSize = 3)
 
 
 def detect_sobel_edges(img, min_length, direction="x"):

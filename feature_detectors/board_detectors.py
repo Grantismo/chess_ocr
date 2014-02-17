@@ -15,7 +15,7 @@ def get_board_mask(img):
   return mask, x, y, width, height
 
 def biggest_square(img):
-  contours, hierarchy = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+  contours, hierarchy = cv2.findContours(img.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
   biggest = None
   max_area = 0
 

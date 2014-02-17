@@ -57,8 +57,28 @@ def detect_sobel_squares(img):
   
 
 def detect_hough_squares(img):
-  edges = detect_canny_edges(img)
-  lines = cv2.HoughLines(edges,1, np.pi/180,100)
+
+  gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+  gray = cv2.GaussianBlur(gray,(5,5),0)
+  gray = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 3, 2) 
+  show_image(gray)
+
+  gray = cv2.morphologyEx(gray,cv2.MORPH_DILATE, cv2.getStructuringElement(cv2.MORPH_RECT, (4, 4)),iterations = 1)
+  show_image(gray)
+  gray = cv2.morphologyEx(gray,cv2.MORPH_ERODE, cv2.getStructuringElement(cv2.MORPH_RECT, (4, 4)),iterations = 1)
+  show_image(gray)
+
+
+  mask, x, y, width, height = get_board_mask(gray)
+  board = cv2.bitwise_and(gray, mask)
+
+  show_image(board)
+
+  edges = detect_canny_edges(board, 1, 100)
+  edges = cv2.morphologyEx(edges,cv2.MORPH_DILATE, cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2)),iterations = 1)
+  show_image(edges)
+
+  lines = cv2.HoughLines(edges,1, np.pi/180, 240)
   edges = cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
   for rho,theta in lines[0]:
     a = np.cos(theta)
@@ -70,15 +90,5 @@ def detect_hough_squares(img):
     x2 = int(x0 - 1000*(-b))
     y2 = int(y0 - 1000*(a))
     cv2.line(edges,(x1,y1),(x2,y2),(0,0,255),2)
-
-def filter(img):
-  img = cv2.GaussianBlur(img,(5,5),0)
-  img = cv2.morphologyEx(img,cv2.MORPH_ERODE, cv2.getStructuringElement(cv2.MORPH_RECT, (6, 6)),iterations = 1)
-  img = cv2.morphologyEx(img,cv2.MORPH_DILATE, cv2.getStructuringElement(cv2.MORPH_RECT, (6, 6)),iterations = 1)
-  return img
-
-def grayscale(img):
-  img = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-  img = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 3, 1) 
-  return img
+  show_image(edges)
 
