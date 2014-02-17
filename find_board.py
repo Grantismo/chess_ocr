@@ -65,7 +65,7 @@ img = cv2.imread('images/boards/board1.png')
 gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 _, thresh = cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY_INV)
 mask = np.zeros((gray.shape), np.uint8)
-show_image(thresh)
+#show_image(thresh)
 
 
 biggest = biggest_square(thresh)
@@ -73,6 +73,7 @@ x, y, width, height = cv2.boundingRect(biggest)
 min_width = width * 0.75
 min_height = height * 0.75
 
+print biggest.dtype
 cv2.drawContours(image=mask, contours=[biggest], contourIdx=-1, thickness=-1, color=(255, 255, 255), lineType=4, maxLevel=1)
 
 #masked_img  = cv2.bitwise_and(gray, mask)
@@ -82,8 +83,8 @@ masked_img = cv2.bitwise_and(thresh, mask)
 x_edges = detect_edges(masked_img, min_width,"x")
 y_edges = detect_edges(masked_img, min_height, "y")
 
-show_image(x_edges)
-show_image(y_edges)
+#show_image(x_edges)
+#show_image(y_edges)
 
 centers = cv2.bitwise_and(x_edges, y_edges) 
 centers = cv2.morphologyEx(centers,cv2.MORPH_DILATE, cv2.getStructuringElement(cv2.MORPH_RECT, (20, 20)),iterations = 1)
@@ -96,10 +97,38 @@ centroids = []
 for cnt in contour:
   mom = cv2.moments(cnt)
   (x,y) = int(mom['m10']/mom['m00']), int(mom['m01']/mom['m00'])
-  cv2.circle(img,(x,y),4,(0,255,0),-1)
+#  cv2.circle(img,(x,y),4,(0,255,0),-1)
   centroids.append((x,y))
 
-show_image(img)
+
+#for i, (x, y) in enumerate(centroids):
+#  cv2.putText(img, str(i), (x, y + 10), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0,0,255))
+
+dtype = [('x', np.int32), ('y', np.int32)]
+centroids = np.array(centroids, dtype=dtype)
+centroids.sort(order="x")
+centroids = centroids.reshape((9, 9, ))
+for row in centroids:
+  row.sort(order="y")
+
+print centroids
+
+
+squares = []
+for i, row in enumerate(centroids[:-1]):
+  for j, _ in enumerate(row[:-1]):
+    square = []
+    for x, y in [(i, j), (i + 1, j), (i + 1, j + 1), (i, j + 1)]:
+      point = centroids[x][y].tolist() #ugly hack to strip type information
+      square.append(point)
+    squares.append(np.array(square))
+
+for square in squares:
+  mask = np.zeros((gray.shape), np.uint8)
+  cv2.drawContours(mask,[square], 0, 255, -1)
+
+  mask = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
+  show_image(cv2.bitwise_and(img, mask))
 
 
 
