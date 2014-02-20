@@ -23,3 +23,8 @@ def show_masked_squares(img, squares):
 
     #mask = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
     show_image(cv2.bitwise_and(img, mask))
+
+def highlight_squares(img, squares):
+  for square in squares:
+    cv2.drawContours(img, [square], 0, (0, 0, 255), 2)
+    
