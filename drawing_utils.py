@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import glob
 import sys
+from machine_learning import *
 
 def show_image(img):
   WINDOW_NAME = "board"
@@ -32,10 +33,20 @@ def write_training_data(img, squares):
 
     cv2.imwrite(folder + str(num) + ".png", roi)
 
-def show_masked_squares(img, squares):
+def show_masked_squares(img, squares, knn=None):
   for square in squares:
     mask = np.zeros((img.shape), np.uint8)
     cv2.drawContours(mask,[square], 0, (255, 255, 255), -1)
+
+    if knn:
+      x, y, width, height = cv2.boundingRect(np.array([square]))
+      roi = img[y: y+ height, x: x + width]
+      f = image_feature(roi)
+
+      ret, result, neighbours, dist = knn.find_nearest(f, k=1)
+      print chr(int(result[0]))
+
+
 
     #mask = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
     show_image(cv2.bitwise_and(img, mask))

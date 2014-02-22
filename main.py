@@ -10,7 +10,16 @@ import signal
 
 def main():
   #train()
-  knn()
+  k = knn()
+
+  files = glob.glob("images/boards/png/*")
+  images = [cv2.imread(f) for f in files]
+  last = images[-1]
+
+  squares = detect_hough_squares(last.copy())
+  if not squares:
+    print "Couldn't find board"
+  show_masked_squares(last, squares, k)
 
 def train():
   files = glob.glob("images/boards/png/*")

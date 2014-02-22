@@ -3,13 +3,22 @@ import numpy as np
 import glob
 from drawing_utils import *
 
+FEATURE_DIM = (30, 30)
+FEATURE_LENGTH = FEATURE_DIM[0] * FEATURE_DIM[1]
+
+def image_feature(img):
+  gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+  train = cv2.resize(gray, FEATURE_DIM)
+
+  train = train.reshape(1, FEATURE_LENGTH)
+  return train.astype(np.float32)
+
+
 def knn():
 
   total_samples = len(glob.glob("images/training_data/**/*"))
-  feature_dim = (30, 30)
-  feature_length = feature_dim[0] * feature_dim[1]
 
-  samples = np.zeros((total_samples, feature_length), dtype=np.float32)
+  samples = np.zeros((total_samples, FEATURE_LENGTH), dtype=np.float32)
   responses = []
 
   training_folders = glob.glob("images/training_data/*")
@@ -18,11 +27,8 @@ def knn():
     piece_type = f[21:]  
     for training_image in glob.glob(f + "/*"):
       img = cv2.imread(training_image)
-      gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-      train = cv2.resize(gray, feature_dim)
 
-      train = train.reshape(1, feature_length)
-      samples[i] = train
+      samples[i] = image_feature(img) 
       i += 1
       responses.append(ord(piece_type))
   responses = np.array(responses, dtype=np.float32)
@@ -37,10 +43,13 @@ def knn():
 
   knn = cv2.KNearest()
   knn.train(samples, responses)
-  ret, result, neighbours, dist = knn.find_nearest(test_samples, k=1)
+  return knn
 
-  matches = result == test_responses
-  correct = np.count_nonzero(matches)
+  #ret, result, neighbours, dist = knn.find_nearest(test_samples, k=1)
 
-  accuracy = correct*100.0 / result.size
-  print accuracy
+  #matches = result == test_responses
+  #correct = np.count_nonzero(matches)
+
+  #accuracy = correct*100.0 / result.size
+  #print accuracy
+ 
