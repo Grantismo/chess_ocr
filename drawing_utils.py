@@ -1,5 +1,7 @@
 import cv2
 import numpy as np
+import glob
+import sys
 
 def show_image(img):
   WINDOW_NAME = "board"
@@ -13,8 +15,22 @@ def show_image(img):
   cv2.resizeWindow(WINDOW_NAME, window_width, window_height)
 
   cv2.imshow(WINDOW_NAME, img)
-  cv2.waitKey(0)
+  k = cv2.waitKey(0)
   cv2.destroyAllWindows()
+  return k
+
+def write_training_data(img, squares):
+  for i, square in enumerate(squares): 
+    sys.stdout.write("%d/64   \r" % (i) )
+    sys.stdout.flush()
+    x, y, width, height = cv2.boundingRect(np.array([square]))
+    roi = img[y: y+ height, x: x + width]
+    k = show_image(roi)
+    
+    folder = "images/training_data/" + chr(k) + "/"
+    num = len(glob.glob(folder + "*.png"))
+
+    cv2.imwrite(folder + str(num) + ".png", roi)
 
 def show_masked_squares(img, squares):
   for square in squares:

@@ -63,7 +63,6 @@ def detect_hough_squares(img):
   lines = cv2.HoughLines(edges,1, np.pi/180, 180)
   edges = cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
   
-  show_image(edges)
   #roi = cv2.cvtColor(roi, cv2.COLOR_GRAY2BGR)
   v_lines = []
   h_lines = []
